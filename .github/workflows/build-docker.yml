@@ -6,7 +6,6 @@ on:
 env:
   ALIYUN_REGISTRY_USER: 1090179900@qq.com
   ALIYUN_REGISTRY_PASSWORD: "${{ secrets.ALIYUN_REGISTRY_PASSWORD }}"
-  TAG: dify-plugin-daemon:$(date +'%Y%m%d%H%M')
   
 jobs:
 
@@ -16,8 +15,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Set dynamic TAG
+      run: echo "TAG=dify-plugin-daemon:$(date +'%Y%m%d%H%M')" >> $GITHUB_ENV
+      
     - name: Build the Docker image
-      run: docker buildx build --file docker/local.dockerfile --tag $TAG .
+      run: docker buildx build --file docker/local.dockerfile --build-arg VERSION=main --tag $TAG .
 
     - name: push image to ACR EE
       run:
