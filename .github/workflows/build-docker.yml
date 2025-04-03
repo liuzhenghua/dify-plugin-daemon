@@ -1,0 +1,29 @@
+name: Docker Image CI
+
+on:
+  workflow_dispatch:
+
+env:
+  ALIYUN_REGISTRY_USER: 1090179900@qq.com
+  ALIYUN_REGISTRY_PASSWORD: "${{ secrets.ALIYUN_REGISTRY_PASSWORD }}"
+  TAG: dify-plugin-daemon:$(date +'%Y%m%d%H%M')
+  
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --build-arg VERSION=main --tag $TAG
+
+    - name: push image to ACR EE
+      run:
+        docker login -u $ALIYUN_REGISTRY_USER -p $ALIYUN_REGISTRY_PASSWORD registry.cn-shenzhen.aliyuncs.com
+        docker tag $TAG registry.cn-shenzhen.aliyuncs.com/docker-mirror2/$TAG
+        docker push registry.cn-shenzhen.aliyuncs.com/docker-mirror2/$TAG
+
+        echo "pushed done registry.cn-shenzhen.aliyuncs.com/docker-mirror2/$TAG"
+      
