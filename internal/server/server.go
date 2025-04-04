@@ -1,6 +1,10 @@
 package server
 
 import (
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/langgenius/dify-plugin-daemon/internal/cluster"
 	"github.com/langgenius/dify-plugin-daemon/internal/core/persistence"
@@ -50,6 +54,21 @@ func initOSS(config *app.Config) oss.OSS {
 	return storage
 }
 
+func waitForSignal(app *App) os.Signal {
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	log.Info("Listening signal for gracefully shutdown")
+
+	sig := <-sigChan
+	log.Info("Received signal: %s", sig)
+	app.cluster.Close()
+
+	<-app.cluster.NotifyClusterStopped()
+	log.Info("Cluster stopped.")
+
+	return sig
+}
+
 func (app *App) Run(config *app.Config) {
 	// init routine pool
 	if config.SentryEnabled {
@@ -92,5 +111,6 @@ func (app *App) Run(config *app.Config) {
 	app.server(config)
 
 	// block
-	select {}
+	// select {}
+	waitForSignal(app)
 }

@@ -101,7 +101,7 @@ func (c *Cluster) schedulePlugins() error {
 			return true
 		}
 		if c.showLog {
-			log.Info("scheduling plugin %s", key)
+			log.Debug("scheduling plugin %s", key)
 		}
 		// do plugin state update
 		err := c.doPluginStateUpdate(value)
@@ -110,7 +110,7 @@ func (c *Cluster) schedulePlugins() error {
 		}
 
 		if c.showLog {
-			log.Info("scheduled plugin %s", key)
+			log.Debug("scheduled plugin %s", key)
 		}
 
 		return true
@@ -132,7 +132,7 @@ func (c *Cluster) doPluginStateUpdate(lifetime *pluginLifeTime) error {
 	}
 
 	if c.showLog {
-		log.Info("updating plugin state %s", identity.String())
+		log.Debug("updating plugin state %s", identity.String())
 	}
 
 	hashedIdentity := plugin_entities.HashedIdentity(identity.String())
@@ -147,7 +147,7 @@ func (c *Cluster) doPluginStateUpdate(lifetime *pluginLifeTime) error {
 	// check if the plugin has been removed
 	if !c.plugins.Exists(identity.String()) {
 		if c.showLog {
-			log.Info("removing plugin state %s due no longer exists", identity.String())
+			log.Debug("removing plugin state %s due no longer exists", identity.String())
 		}
 		// remove state
 		err = c.removePluginState(c.id, hashedIdentity)
@@ -156,7 +156,7 @@ func (c *Cluster) doPluginStateUpdate(lifetime *pluginLifeTime) error {
 		}
 	} else {
 		if c.showLog {
-			log.Info("updating plugin state %s", identity.String())
+			log.Debug("updating plugin state %s", identity.String())
 		}
 		// update plugin state
 		scheduleState.ScheduledAt = &[]time.Time{time.Now()}[0]
@@ -166,7 +166,7 @@ func (c *Cluster) doPluginStateUpdate(lifetime *pluginLifeTime) error {
 		}
 		lifetime.lifetime.UpdateScheduledAt(*scheduleState.ScheduledAt)
 		if c.showLog {
-			log.Info("updated plugin state %s", identity.String())
+			log.Debug("updated plugin state %s", identity.String())
 		}
 	}
 
